@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: contact-form-backend
+  labels:
+    app: contact-form-backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: contact-form-backend
+  template:
+    metadata:
+      labels:
+        app: contact-form-backend
+    spec:
+      containers:
+      - name: contact-form-backend
+        image: your-docker-username/contact-form-backend:latest
+        ports:
+        - containerPort: 3000
+        env:
+        - name: PORT
+          value: "3000"
+        - name: EMAIL_USER
+          valueFrom:
+            secretKeyRef:
+              name: contact-form-secrets
+              key: email-user
+        - name: EMAIL_PASS
+          valueFrom:
+            secretKeyRef:
+              name: contact-form-secrets
+              key: email-password
+        - name: ADMIN_EMAILS
+          valueFrom:
+            secretKeyRef:
+              name: contact-form-secrets
+              key: admin-emails
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: contact-form-secrets
+type: Opaque
+data:
+  email-user: <base64-encoded-email>
+  email-password: <base64-encoded-app-password>
+  admin-emails: <base64-encoded-comma-separated-emails>
